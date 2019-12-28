@@ -100,6 +100,8 @@ class balenaSense():
 
         return measurements
 
+# "eco2_ppm", "air_quality_score_accuracy", "bvoce_ppm", "temperature", "pressure", "air_quality_score", "humidity"
+
 # Start the server to answer requests for readings
 balenasense = balenaSense()
 
@@ -110,15 +112,11 @@ def fill_gauge():
     print('starting fill gauge thread')
     while True:
         time.sleep(5)
-        print('getting measurements')
         try:
             measurements = balenasense.sample()
         except Exception as e:
             print('COULD NOT GET MEASUREMENTS', e)
             continue
-
-        for k, v in measurements[0]['fields'].items():
-            gauge.labels(type=k).set(v)
 
 _thread.start_new_thread(fill_gauge, ())
 
