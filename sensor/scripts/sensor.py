@@ -104,25 +104,21 @@ class balenaSense():
 balenasense = balenaSense()
 
 # "eco2_ppm", "air_quality_score_accuracy", "bvoce_ppm", "temperature", "pressure", "air_quality_score", "humidity"
-gauge = Gauge("bme680_metrics", "bme680_metrics", ["type"])
+gauge = Gauge('bme680_metrics', 'bme680_metrics', ['type'])
 
 def fill_gauge():
+    print('starting fill gauge thread')
     while True:
+        time.sleep(5)
+        print('getting measurements')
         try:
             measurements = balenasense.sample()
+        except Exception as e:
+            print('COULD NOT GET MEASUREMENTS', e)
+            continue
 
-            print('measurements')
-            print(measurements)
-
-            for k, v in measurements[0]['fields'].items():
-                gauge.set(k, v)
-
-            print('gauge')
-            print(gauge)
-        except:
-            print('COULD NOT GET MEASUREMENTS')
-
-        time.sleep(5)
+        for k, v in measurements[0]['fields'].items():
+            gauge.labels(type=k).set(v)
 
 _thread.start_new_thread(fill_gauge, ())
 
