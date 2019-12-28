@@ -9,6 +9,7 @@ import os
 import json
 
 from bme680 import BME680
+from prometheus_client import Gauge
 from w1therm import W1THERM
 from http.server import HTTPServer, BaseHTTPRequestHandler
 
@@ -97,8 +98,10 @@ class balenaSense():
             measurements[0]['fields']['pressure'] = measurements[0]['fields']['pressure'] * (1-((0.0065 * altitude) / (measurements[0]['fields']['temperature'] + (0.0065 * altitude) + 273.15))) ** -5.257
 
         return measurements
+    
+# "eco2_ppm", "air_quality_score_accuracy", "bvoce_ppm", "temperature", "pressure", "air_quality_score", "humidity"
 
-
+gauge = Gauge("bme680_metrics", "bme680_metrics", ["type"])
 
 class balenaSenseHTTP(BaseHTTPRequestHandler):
     def _set_headers(self):
@@ -108,7 +111,12 @@ class balenaSenseHTTP(BaseHTTPRequestHandler):
 
     def do_GET(self):
         self._set_headers()
+        
         measurements = balenasense.sample()
+        
+        for k, v in measurements[0]['fields'].items():
+            gauge.set(k, v)
+            
         self.wfile.write(json.dumps(measurements[0]['fields']).encode('UTF-8'))
 
     def do_HEAD(self):
