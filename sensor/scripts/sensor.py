@@ -118,6 +118,9 @@ def fill_gauge():
             print('COULD NOT GET MEASUREMENTS', e)
             continue
 
+        for k, v in measurements[0]['fields'].items():
+            gauge.labels(type=k).set(v)
+
 _thread.start_new_thread(fill_gauge, ())
 
 print('starting server at port 4242')
