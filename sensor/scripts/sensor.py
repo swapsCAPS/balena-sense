@@ -6,9 +6,11 @@ import sys
 import time
 import smbus
 import os
-import json
+import _thread
+import time
 
 from bme680 import BME680
+from prometheus_client import Gauge, start_http_server
 from w1therm import W1THERM
 from http.server import HTTPServer, BaseHTTPRequestHandler
 
@@ -98,28 +100,31 @@ class balenaSense():
 
         return measurements
 
-
-
-class balenaSenseHTTP(BaseHTTPRequestHandler):
-    def _set_headers(self):
-        self.send_response(200)
-        self.send_header('Content-type', 'text/html')
-        self.end_headers()
-
-    def do_GET(self):
-        self._set_headers()
-        measurements = balenasense.sample()
-        self.wfile.write(json.dumps(measurements[0]['fields']).encode('UTF-8'))
-
-    def do_HEAD(self):
-        self._set_headers()
-
-
 # Start the server to answer requests for readings
 balenasense = balenaSense()
 
-while True:
-    server_address = ('', 80)
-    httpd = HTTPServer(server_address, balenaSenseHTTP)
-    print('Sensor HTTP server running')
-    httpd.serve_forever()
+# "eco2_ppm", "air_quality_score_accuracy", "bvoce_ppm", "temperature", "pressure", "air_quality_score", "humidity"
+gauge = Gauge("bme680_metrics", "bme680_metrics", ["type"])
+
+def fill_gauge():
+    while True:
+        try:
+            measurements = balenasense.sample()
+
+            print('measurements')
+            print(measurements)
+
+            for k, v in measurements[0]['fields'].items():
+                gauge.set(k, v)
+
+            print('gauge')
+            print(gauge)
+        except:
+            print('COULD NOT GET MEASUREMENTS')
+
+        time.sleep(5)
+
+_thread.start_new_thread(fill_gauge, ())
+
+print('starting server at port 4242')
+start_http_server(4242)
