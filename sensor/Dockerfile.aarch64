@@ -14,6 +14,7 @@ RUN echo $BSEC_FILENAME > version
 
 WORKDIR /usr/src/app/bsec_bme680_linux
 RUN chmod +x make.sh
+RUN mkdir -p /data/sensor
 RUN ./make.sh
 
 RUN pip install smbus prometheus_client
