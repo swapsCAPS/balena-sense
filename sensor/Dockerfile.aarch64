@@ -1,13 +1,14 @@
-FROM balenalib/raspberrypi3-python:3-build
+FROM balenalib/raspberrypi3-python:3.8-build
 
-ARG BSEC_FILENAME=BSEC_1.4.7.4_Generic_Release.zip
+ARG BSEC_FILENAME=bsec_1-4-8-0_generic_release_updated_v3.zip
 
 RUN install_packages \
-        unzip
+  unzip \
+  git
 
 WORKDIR /usr/src/app
-RUN git clone https://github.com/balena-io-playground/bsec_bme680_linux.git
-RUN wget https://ae-bst.resource.bosch.com/media/_tech/media/bsec/$BSEC_FILENAME
+RUN git clone https://github.com/swapsCAPS/bsec_bme680_linux
+COPY bsec_1-4-8-0_generic_release_updated_v3.zip bsec_1-4-8-0_generic_release_updated_v3.zip
 RUN unzip -d bsec_bme680_linux/src $BSEC_FILENAME
 RUN echo $BSEC_FILENAME > version
 
