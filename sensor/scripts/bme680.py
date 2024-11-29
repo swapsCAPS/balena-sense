@@ -31,13 +31,14 @@ class BME680:
         process = subprocess.Popen(self.command, stdout=subprocess.PIPE)
 
         for line in io.TextIOWrapper(process.stdout, encoding="utf-8"):
-            self.data = json.loads(line.strip())
+            self.data = line.strip()
 
         rc = process.poll()
         time.sleep(2)
         return rc
 
     def get_readings(self, sensor):
+        return []
         return [
             {
                 'measurement': 'balena-sense',
